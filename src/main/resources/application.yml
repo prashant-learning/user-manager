@@ -1,0 +1,26 @@
+server:
+    port: 8085
+spring:
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        hikari:
+            connection-timeout: 60000
+            idle-timeout: 3000
+            maximum-pool-size: 200
+            minimum-idle: 30
+            poolName: HikariCP
+        password: Prashant@123
+        type: com.zaxxer.hikari.HikariDataSource
+        url: jdbc:mysql://localhost:3306/chandra
+        username: root
+    jpa:
+        properties:
+            hibernate:
+                format_sql: true
+                show_sql: true
+                use_sql_comments: true
+#        hibernate:
+#            ddl-auto: create
+springdoc:
+    swagger-ui:
+        path: /user-manager/swagger/index.html

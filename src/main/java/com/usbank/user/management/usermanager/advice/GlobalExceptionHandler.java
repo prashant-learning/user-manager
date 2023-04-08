@@ -1,5 +1,6 @@
 package com.usbank.user.management.usermanager.advice;
 
+import com.usbank.user.management.usermanager.exception.RoleNotFoundException;
 import com.usbank.user.management.usermanager.exception.UserAlreadyExistException;
 import com.usbank.user.management.usermanager.model.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,16 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse  = new ErrorResponse(LocalDateTime.now(), "Already exist" , HttpStatus.CONFLICT, exception.getMessage() );
 
         return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(errorResponse);
+    }
+
+    @ExceptionHandler({RoleNotFoundException.class})
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<ErrorResponse> handleRoleNotFoundException(RoleNotFoundException exception){
+
+        ErrorResponse errorResponse  = new ErrorResponse(LocalDateTime.now(), "Role not found" , HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage() );
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(errorResponse);
     }
 }

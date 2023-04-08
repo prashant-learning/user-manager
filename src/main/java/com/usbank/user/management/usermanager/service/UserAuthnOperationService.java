@@ -2,6 +2,7 @@ package com.usbank.user.management.usermanager.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.usbank.user.management.usermanager.exception.RoleNotFoundException;
 import com.usbank.user.management.usermanager.exception.UserAlreadyExistException;
 import com.usbank.user.management.usermanager.model.UserRole;
 import com.usbank.user.management.usermanager.model.UserSignupRequest;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.usbank.user.management.usermanager.repository.UserRepository;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,28 +45,28 @@ public class UserAuthnOperationService {
         validateUserSignUpRequest(userSignupRequest);
 
         User user = new User();
+        Set<Role> roleSet = new HashSet<>();
 
         Set<String> requestRoles = userSignupRequest.getRole();
 
-        Set<Role> entityRole = requestRoles.stream().map(requestRole -> {
-            Role role = new Role();
-            role.setName(UserRole.valueOf(requestRole));
-            return role;
-        }).collect(Collectors.toSet());
+        requestRoles.forEach(strRole -> {
+          roleSet.add( roleRepository.findByName(UserRole.valueOf(strRole)).get());
+        });
+
 
         ObjectMapper mapper = new ObjectMapper();
         String jsonString = mapper.writeValueAsString(userSignupRequest.getAddress());
         Address addressEntity = mapper.readValue(jsonString, Address.class);
 
         user.setAddress(addressEntity);
-        user.setRole(entityRole);
+        user.setRole(roleSet);
         user.setEmail(userSignupRequest.getEmail());
         user.setPassword(userSignupRequest.getPassword());
         user.setPhoneNumber(userSignupRequest.getPhoneNumber());
         user.setUsername(userSignupRequest.getUsername());
 
         addressRepository.save(addressEntity);
-        entityRole.forEach(role -> roleRepository.save(role));
+
         User createdUser = userRepository.save(user);
 
        return  new UserRegistrationResponse(createdUser.getId(), "Successfully created the user");
@@ -81,5 +83,11 @@ public class UserAuthnOperationService {
         if(userRepository.findByPhoneNumber(userSignupRequest.getPhoneNumber()).isPresent()){
             throw new UserAlreadyExistException("User already exist with this phone number");
         }
+        userSignupRequest.getRole().stream().forEach(role -> {
+           if( roleRepository.findByName(UserRole.valueOf(role)).isEmpty()){
+             throw new RoleNotFoundException("Requested role is not found");
+           }
+        });
+
     }
 }

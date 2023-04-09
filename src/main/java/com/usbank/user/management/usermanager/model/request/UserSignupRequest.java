@@ -1,5 +1,6 @@
-package com.usbank.user.management.usermanager.model;
+package com.usbank.user.management.usermanager.model.request;
 
+import com.usbank.user.management.usermanager.model.Address;
 import lombok.Data;
 
 import java.util.Set;

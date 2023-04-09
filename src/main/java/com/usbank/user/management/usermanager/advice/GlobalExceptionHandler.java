@@ -5,6 +5,7 @@ import com.usbank.user.management.usermanager.exception.UserAlreadyExistExceptio
 import com.usbank.user.management.usermanager.model.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -31,6 +32,16 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse  = new ErrorResponse(LocalDateTime.now(), "Role not found" , HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage() );
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(errorResponse);
+    }
+
+    @ExceptionHandler({UsernameNotFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(UsernameNotFoundException exception){
+
+        ErrorResponse errorResponse  = new ErrorResponse(LocalDateTime.now(), "User not found" , HttpStatus.NOT_FOUND, exception.getMessage() );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(errorResponse);
     }
 }

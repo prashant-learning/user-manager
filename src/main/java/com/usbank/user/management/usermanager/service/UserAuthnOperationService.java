@@ -5,20 +5,28 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.usbank.user.management.usermanager.exception.RoleNotFoundException;
 import com.usbank.user.management.usermanager.exception.UserAlreadyExistException;
 import com.usbank.user.management.usermanager.model.UserRole;
-import com.usbank.user.management.usermanager.model.UserSignupRequest;
+import com.usbank.user.management.usermanager.model.request.UserLoginRequest;
+import com.usbank.user.management.usermanager.model.request.UserSignupRequest;
 import com.usbank.user.management.usermanager.model.entity.Address;
 import com.usbank.user.management.usermanager.model.entity.Role;
 import com.usbank.user.management.usermanager.model.entity.User;
+import com.usbank.user.management.usermanager.model.response.UserLoginResponse;
 import com.usbank.user.management.usermanager.model.response.UserRegistrationResponse;
 import com.usbank.user.management.usermanager.repository.AddressRepository;
 import com.usbank.user.management.usermanager.repository.RoleRepository;
+import com.usbank.user.management.usermanager.util.EncryptDecryptUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import com.usbank.user.management.usermanager.repository.UserRepository;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class UserAuthnOperationService {
@@ -31,6 +39,14 @@ public class UserAuthnOperationService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+
+    public Optional<User> getUserByUserName(String username){
+        return userRepository.findByUsername(username);
+    }
 
 
     /**
@@ -53,6 +69,7 @@ public class UserAuthnOperationService {
           roleSet.add( roleRepository.findByName(UserRole.valueOf(strRole)).get());
         });
 
+        String encryptedPassword = EncryptDecryptUtil.encrypt(userSignupRequest.getPassword());
 
         ObjectMapper mapper = new ObjectMapper();
         String jsonString = mapper.writeValueAsString(userSignupRequest.getAddress());
@@ -61,7 +78,7 @@ public class UserAuthnOperationService {
         user.setAddress(addressEntity);
         user.setRole(roleSet);
         user.setEmail(userSignupRequest.getEmail());
-        user.setPassword(userSignupRequest.getPassword());
+        user.setPassword(encryptedPassword);
         user.setPhoneNumber(userSignupRequest.getPhoneNumber());
         user.setUsername(userSignupRequest.getUsername());
 
@@ -70,6 +87,19 @@ public class UserAuthnOperationService {
         User createdUser = userRepository.save(user);
 
        return  new UserRegistrationResponse(createdUser.getId(), "Successfully created the user");
+    }
+
+    public UserLoginResponse loginUser(UserLoginRequest loginRequest){
+
+        Authentication authentication = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        User user = userRepository.findByUsername(loginRequest.getUsername()).orElseThrow(() ->
+                new UsernameNotFoundException("User not found with username or email:" + loginRequest.getUsername()));
+
+        return  new UserLoginResponse(user.getId(), user.getUsername(), user.getEmail(), user.getPhoneNumber());
+
     }
 
 

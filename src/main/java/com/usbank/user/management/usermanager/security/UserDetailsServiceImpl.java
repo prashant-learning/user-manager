@@ -3,6 +3,7 @@ package com.usbank.user.management.usermanager.security;
 import com.usbank.user.management.usermanager.model.entity.User;
 import com.usbank.user.management.usermanager.repository.UserRepository;
 import com.usbank.user.management.usermanager.util.EncryptDecryptUtil;
+import com.usbank.user.management.usermanager.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,7 +20,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 

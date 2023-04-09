@@ -41,7 +41,7 @@ public class JwtUtil {
         Claims claims = Jwts.claims()
                 .setSubject(user.getUsername())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs));
-        claims.put("userName", user.getUsername() + "");
+        claims.put("username", user.getUsername() + "");
         claims.put("role", user.getRole());
 
         return Jwts.builder()
@@ -68,6 +68,24 @@ public class JwtUtil {
         }
 
         return false;
+    }
+
+    private Claims getAllClaimsFromToken(String token) {
+        Claims claims;
+        try {
+            claims = Jwts.parser()
+                    .setSigningKey(jwtSecret)
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            logger.error("Could not get all claims Token from passed token");
+            claims = null;
+        }
+        return claims;
+    }
+
+    public String getUserNameFromToken(String token){
+       return getAllClaimsFromToken(token).getSubject();
     }
 
 }

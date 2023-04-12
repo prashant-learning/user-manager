@@ -1,5 +1,6 @@
 package com.usbank.user.management.usermanager.model;
 
+import com.usbank.user.management.usermanager.model.response.LoanAccountDetailsResponse;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -14,4 +15,6 @@ public class Accounts {
     private String branchName;
     private String branchLocation;
     private String branchIFSC;
+
+    private LoanAccountDetailsResponse loanAccountDetailsResponse;
 }

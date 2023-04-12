@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -27,7 +29,7 @@ public class UserAccountController implements UserAccountsApi {
 
     @Override
     @Tag(name = "user account details")
-    @Operation(summary = "Used for getting account", description = "")
+    @Operation(summary = "Used for getting account", description = "",security = { @SecurityRequirement(name = "bearer-key") })
     @ApiResponses(
             {
                     @ApiResponse(responseCode = "200", description = "Successful login"),
@@ -37,12 +39,11 @@ public class UserAccountController implements UserAccountsApi {
     )
     @Parameters(
             {
-                    @Parameter(name = "Authorization", description = "This is token", in = ParameterIn.HEADER, required = true )
-
+                    @Parameter(name = "Authorization", description = "This is headers", in = ParameterIn.HEADER, required = false )
             }
     )
     @GetMapping("/{username}")
-    public ResponseEntity<List<Accounts>> getUserAccountDetails(@PathVariable String username, @RequestHeader(required = true) String Authorization) {
+    public ResponseEntity<List<Accounts>> getUserAccountDetails(@PathVariable String username) {
 
         return ResponseEntity.status(HttpStatus.OK).body(userAccountService.getAccountsByUsername(username));
     }

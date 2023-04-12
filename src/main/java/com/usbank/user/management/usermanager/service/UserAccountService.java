@@ -6,7 +6,6 @@ import com.usbank.user.management.usermanager.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -37,7 +36,7 @@ public class UserAccountService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String url = "http://localhost:8095/api/v1/user/accounts/{userId}";
+        String url = "http://localhost:8095/api/v1/user/accounts/loan/{userId}";
 
         Map<String, String> map = new HashMap<>();
         map.put("userId", user.getId().toString());
@@ -50,8 +49,6 @@ public class UserAccountService {
         Accounts[] accounts = responseEntity.getBody();
 
         return List.of(accounts);
-
-
 
     }
 }
